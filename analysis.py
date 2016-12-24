@@ -13,10 +13,15 @@ class Team:
         self.name = name
         self.tid = tid
         self.owner = owner
+        self.scores = []
 
     def printTeam(self):
         print("Name:", self.name, ", Team ID:",
             self.tid, ", Owner:", self.owner)
+
+    def addScore(self, score):
+        scores.append(score)
+
 
 class League:
 
@@ -32,6 +37,9 @@ class League:
 
     def addTeam(self, teamId, newTeam):
         self.teams[teamId-1] = newTeam
+
+    def getTeamById(self, id):
+        return self.schedule[id]
 
     def fetchTeams(self):
         r  = requests.get("http://games.espn.com/ffl/standings?leagueId=28641&seasonId=2016", headers=headers)
@@ -55,12 +63,11 @@ class League:
             r = requests.get(url, headers=headers)
             soup = BeautifulSoup(r.text, 'html.parser')
             weekSchedule = []
-            for table in soup.find_all('table', class_='ptsBased matchup'): #every matchup in the week
-                matchup = []
-                for team in table.find_all('tr')[:-1]:
-                    #print('thing:', team.get('id'))
-                    a = re.match(r".*_([0-9]{1,2})_.*", team.get('id')).group(1)
-                    matchup.append(a)
+            for game in soup.find_all('table', class_='ptsBased matchup'): #every matchup in the week
+                matchup = () #int tuple
+                for team in game.find_all('tr')[:-1]:
+                    a = int(re.match(r".*_([0-9]{1,2})_.*", team.get('id')).group(1)) #get id of team in matchup
+                    matchup = matchup + (a,)
                 weekSchedule.append(matchup)
 
             self.schedule.append(weekSchedule)
