@@ -6,7 +6,9 @@ import re
 headers = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.95 Safari/537.36'
 }
+
 class Team:
+
     def __init__(self, name, tid, owner):
         self.name = name
         self.tid = tid
@@ -17,12 +19,12 @@ class Team:
             self.tid, ", Owner:", self.owner)
 
 class League:
+
     def __init__(self, name):
         self.name = name
-        #self.teams = []
-        self.teams = []
         self.teams = [None] * 12
         self.players = {99999 : "Dummy Player"}
+        self.schedule = []
 
     def printLeague(self):
         for team in self.teams:
@@ -61,12 +63,13 @@ class League:
                     matchup.append(a)
                 weekSchedule.append(matchup)
 
-        teamOwner = re.match(r".*\((.*?)\).*", rawName).group(1)
-        teamName = re.match(r"^(.*?)\(", rawName).group(1)
-        teamId = re.match(r".*teamId=([0-9]{1,2}).*", teamLink).group(1)
+            self.schedule.append(weekSchedule)
 
-        newTeam = Team(teamName, teamId, teamOwner)
-        l.addTeam(newTeam)
+
+if __name__ == "__main__":
+    l = League("My League")
+    l.fetchSchedule()
+    print(l.schedule)
 
     l.fetchTeams()
     l.printLeague()
