@@ -89,7 +89,7 @@ class League:
                     a = int(re.match(r".*_([0-9]{1,2})_.*", team.get('id')).group(1))
                     matchup = matchup + (a,)
                     # add score to teams list of scores
-                    score = team.find('td', class_='score').get('title')
+                    score = float(team.find('td', class_='score').get('title'))
                     self.getTeamById(a).addScore(score)
                 # add new matchup to this weeks matchup list
                 weekSchedule.append(matchup)
