@@ -59,7 +59,6 @@ class League:
         outcome = [0 for i in range(12)]
         for i, week in enumerate(self.schedule):
             for matchup in week:
-                if self.didWin(assignment[matchup[0] - 1]):
                 team1 = self.getTeamById(assignment[matchup[0] - 1])
                 team2 = self.getTeamById(assignment[matchup[1] - 1])
                 team1Score, team2Score = team1.scores[i], team2.scores[i]
