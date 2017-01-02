@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from itertools import permutations
 import requests
 import re
 
@@ -24,14 +25,19 @@ class Team:
     def addScore(self, score):
         self.scores.append(score)
 
+    def getScoreByWeek(self, weekNum):
+        return scores[weekNum + 1]
+
+
 
 class League:
 
-    def __init__(self, name):
+    def __init__(self, name="My League"):
         self.name = name
         self.teams = [None] * 12
         self.players = {99999 : "Dummy Player"}
         self.schedule = []
+        self.fetchAll()
 
     #TODO: Explore python __repr__ for print statements
     def printSchedule(self):
@@ -48,6 +54,26 @@ class League:
 
     def getTeamById(self, tid):
         return self.teams[tid - 1]
+
+    def getOutcome(self, assignment):
+        outcome = [0 for i in range(12)]
+        for i, week in enumerate(self.schedule):
+            for matchup in week:
+                if self.didWin(assignment[matchup[0] - 1]):
+                team1 = self.getTeamById(assignment[matchup[0] - 1])
+                team2 = self.getTeamById(assignment[matchup[1] - 1])
+                team1Score, team2Score = team1.scores[i], team2.scores[i]
+                if team1Score > team2Score: #t1 win
+                    outcome[team1.tid - 1] += 1
+                else: #t2 win
+                    outcome[team2.tid - 1] += 1
+        return outcome
+
+    def simulateAllSeasons(self):
+        upperB = len(self.teams) + 1
+        allPerms = permutations(range(1,upperB))
+        for assignment in allPerms:
+            yield self.getOutcome(assignment)
 
     def fetchAll(self):
         self.fetchTeams()
@@ -97,10 +123,8 @@ class League:
             self.schedule.append(weekSchedule)
 
 
+
 if __name__ == "__main__":
     l = League("My League")
     l.fetchAll()
-    #l.printSchedule()
-
     print(l.__dict__)
-    #l.printLeague()
