@@ -22,12 +22,13 @@ class Team:
         print("Name:", self.name, ", Team ID:",
             self.tid, ", Owner:", self.owner)
 
+    # Add to the end of the score list
     def addScore(self, score):
         self.scores.append(score)
 
+    # Returns the instance teams score given a week
     def getScoreByWeek(self, weekNum):
         return scores[weekNum + 1]
-
 
 
 class League:
@@ -49,12 +50,18 @@ class League:
         for team in self.teams:
             team.printTeam()
 
+    # Add a team to the league
     def addTeam(self, teamId, newTeam):
         self.teams[teamId-1] = newTeam
 
+    # Return the team object given a @tid ()
     def getTeamById(self, tid):
         return self.teams[tid - 1]
 
+    # Returns an outcome list for a given team assignment, such that
+    # outcome[i] = number of wins (the TRUE) team i had. The results are NOT
+    # ordered according to the @assignment variable, but rather to the
+    # leagues TRUE ordering.
     def getOutcome(self, assignment):
         outcome = [0 for i in range(12)]
         for i, week in enumerate(self.schedule):
@@ -68,16 +75,21 @@ class League:
                     outcome[team2.tid - 1] += 1
         return outcome
 
+    # Returns an iterator over the outcomes of each season.
+    # Outcome format is a list, with the number at index i represinting
+    # the number of wins team i finished with
     def simulateAllSeasons(self):
         upperB = len(self.teams) + 1
         allPerms = permutations(range(1,upperB))
         for assignment in allPerms:
             yield self.getOutcome(assignment)
 
+    # Calls all web scrapers
     def fetchAll(self):
         self.fetchTeams()
         self.fetchSchedule()
 
+    # Gathers team information, including owner, name, and record
     def fetchTeams(self):
         url = "http://games.espn.com/ffl/standings?leagueId=28641&seasonId=2016"
         r  = requests.get(url, headers=headers)
@@ -99,6 +111,8 @@ class League:
 
     # NOTE: This function is dependent on the teams being imported already.
     # Potentially refactor to remove this dependency.
+    # Imports the schedule of the league, keeping track of the scores that
+    # each team earned in any given week.
     def fetchSchedule(self):
         #iterate over every week in the regular season schedule
         baseUrl = "http://games.espn.com/ffl/scoreboard?leagueId=28641&matchupPeriodId="
