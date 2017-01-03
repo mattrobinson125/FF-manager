@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 from itertools import permutations
 import requests
 import re
+import csv
 
 
 headers = {
@@ -84,6 +85,33 @@ class League:
         for assignment in allPerms:
             yield self.getOutcome(assignment)
 
+    # Retrieves and returns the winCts, while also writing them to a CSV file.
+    def exportWinCts(self):
+        data = []
+        winCts = self.getAllWinCts()
+        for i, teamCts in enumerate(winCts):
+            teamOwner = l.getTeamById(i+1).owner
+            for winNum, freq in enumerate(teamCts):
+                data = data + [[teamOwner, winNum, freq]]
+        exportToCSV(data)
+        return winCts
+
+    # Returns a list of win counts for every team.
+    # Win counts are a format such that the number at index[i][j] represents
+    # the number of schedules that yield j wins for team i.
+    def getAllWinCts(self):
+        print("This will take a while...")
+        ct = 0
+        winCts = [[0 for i in range(1 + len(self.schedule))] for i in range(len(self.teams))]
+        for outcome in self.simulateAllSeasons():
+            ct += 1
+            for i, winCt in enumerate(outcome):
+                winCts[i][winCt] += 1
+            if ct % 1000000 == 0:
+                print('iteration', ct, 'of 479001600')
+                print(winCts)
+        return winCts
+
     # Calls all web scrapers
     def fetchAll(self):
         self.fetchTeams()
@@ -135,6 +163,12 @@ class League:
             # finally, add week to overall schedule list
             self.schedule.append(weekSchedule)
 
+
+# Exports a list to a csv file.
+def exportToCSV(lst):
+    with open('allwincts.csv', 'w', newline='') as fp:
+        a = csv.writer(fp, delimiter=',')
+        a.writerows(lst)
 
 
 if __name__ == "__main__":
