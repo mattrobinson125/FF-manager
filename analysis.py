@@ -80,10 +80,14 @@ class League:
     # Outcome format is a list, with the number at index i represinting
     # the number of wins team i finished with
     def simulateAllSeasons(self):
-        upperB = len(self.teams) + 1
-        allPerms = permutations(range(1,upperB))
-        for assignment in allPerms:
-            yield self.getOutcome(assignment)
+        teams, weeks = len(self.teams), len(self.schedule)
+        allPerms = permutations(range(1, 1 + teams))
+        winCts = [[0 for i in range(1 + weeks)] for i in range(teams)]
+        print("This will take a while...")
+        for outcome in map(self.getOutcome, allPerms):
+            for i, winCt in enumerate(outcome):
+                winCts[i][winCt] += 1
+        return winCts
 
     # Retrieves and returns the winCts, while also writing them to a CSV file.
     def exportWinCts(self):
@@ -96,21 +100,6 @@ class League:
         exportToCSV(data)
         return winCts
 
-    # Returns a list of win counts for every team.
-    # Win counts are a format such that the number at index[i][j] represents
-    # the number of schedules that yield j wins for team i.
-    def getAllWinCts(self):
-        print("This will take a while...")
-        ct = 0
-        winCts = [[0 for i in range(1 + len(self.schedule))] for i in range(len(self.teams))]
-        for outcome in self.simulateAllSeasons():
-            ct += 1
-            for i, winCt in enumerate(outcome):
-                winCts[i][winCt] += 1
-            if ct % 1000000 == 0:
-                print('iteration', ct, 'of 479001600')
-                print(winCts)
-        return winCts
 
     # Calls all web scrapers
     def fetchAll(self):
@@ -172,6 +161,8 @@ def exportToCSV(lst):
 
 
 if __name__ == "__main__":
+    print("Creating new league and fetching data...")
     l = League("My League")
     l.fetchAll()
+    print("Done fetching")
     print(l.__dict__)
